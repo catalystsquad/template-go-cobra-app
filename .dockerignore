@@ -1,0 +1,6 @@
+.git/
+test
+.gitignore
+.dockerignore
+skaffold-values.yaml
+skaffold.yaml

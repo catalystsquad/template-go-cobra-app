@@ -1,0 +1,49 @@
+name: Pull Request
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'cmd/**'
+      - 'internal/**'
+      - Dockerfile
+      - 'go.mod'
+      - 'go.sum'
+jobs:
+  conventional-commits-pr:
+    if: github.event.pull_request.draft == false
+    name: Validate Conventional Commits PR
+    runs-on: ubuntu-latest
+    steps:
+      - uses: crazy-max/ghaction-dump-context@v1
+      - uses: catalystsquad/action-validate-conventional-commits-pr@v1
+  ensure-compile:
+    if: github.event.pull_request.draft == false
+    name: Ensure project compiles
+    runs-on: ubuntu-latest
+    steps:
+      - uses: crazy-max/ghaction-dump-context@v1
+      - name: Auth Github
+        run: |
+          git config --global url."https://${{ secrets.AUTOMATION_PAT }}@github.com".insteadOf "https://github.com"
+      - name: Compile
+        uses: catalystsquad/action-compile-go@v1
+  test:
+    needs:
+      - ensure-compile
+    name: Test
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    env:
+      GIT_PAT: ${{ secrets.AUTOMATION_PAT }}
+    steps:
+      - name: Dump Context
+        uses: crazy-max/ghaction-dump-context@v1
+      - name: Run Tests
+        uses: catalystsquad/action-kind-test@v1
+        with:
+          token: ${{ secrets.AUTOMATION_PAT }}
+          wait-for-ports: 6000
+          add-private-helm-repo: "true"
+          helm-repo-username: ${{ secrets.AUTOMATION_PAT }}
+          helm-repo-password: ${{ secrets.AUTOMATION_PAT }}

@@ -1,0 +1,47 @@
+apiVersion: skaffold/v2beta25
+kind: Config
+build:
+  artifacts:
+    - image: template-go-cobra-app
+      custom:
+        buildCommand: |
+          DOCKER_BUILDKIT=1 docker build --tag $IMAGE --build-arg BUILDKIT_INLINE_CACHE=1 --secret id=GIT_PAT "$BUILD_CONTEXT"
+        dependencies:
+          dockerfile:
+            path: Dockerfile
+deploy:
+  helm:
+    releases:
+      - name: template-go-cobra-app
+        namespace: template-go-cobra-app
+        createNamespace: true
+#        chartPath: ../chart-template-go-cobra-app/chart
+        remoteChart: catalyst/template-go-cobra-app
+        version: '>=1.0.0-alpha'
+        artifactOverrides:
+          image: template-go-cobra-app
+        imageStrategy:
+          helm: {}
+        valuesFiles:
+          - skaffold-values.yaml
+portForward: []
+  # example pf for grpc server
+#  - resourceType: service
+#    resourceName: template-go-cobra-app
+#    namespace: template-go-cobra-app
+#    port: 6000
+#    localPort: 6000
+
+profiles:
+  - name: actions
+    activation:
+      - env: SKAFFOLD_ACTIONS=true
+    build:
+      artifacts:
+        - image: template-go-cobra-app
+          custom:
+            buildCommand: |
+              docker buildx build --tag $IMAGE --load --cache-from type=gha,mode=max --cache-to type=gha,mode=max --build-arg BUILDKIT_INLINE_CACHE=1 --secret id=GIT_PAT "$BUILD_CONTEXT"
+            dependencies:
+              dockerfile:
+                path: Dockerfile
