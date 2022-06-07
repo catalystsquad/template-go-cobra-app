@@ -3,8 +3,7 @@ module github.com/catalystsquad/template-go-cobra-app
 go 1.18
 
 require (
-	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d
-	github.com/catalystsquad/app-utils-go v1.0.4
+	github.com/catalystsquad/app-utils-go v1.0.5
 	github.com/nozzle/e v0.0.0-20220519044928-6c20ecc522b1
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.4.0
@@ -16,6 +15,7 @@ require (
 	cloud.google.com/go v0.101.1 // indirect
 	cloud.google.com/go/compute v1.6.1 // indirect
 	cloud.google.com/go/errorreporting v0.2.0 // indirect
+	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/getsentry/sentry-go v0.13.0 // indirect

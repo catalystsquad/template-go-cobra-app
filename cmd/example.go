@@ -1,8 +1,7 @@
 package cmd
 
 import (
-	"encoding/json"
-	"github.com/asaskevich/govalidator"
+	configutils "github.com/catalystsquad/app-utils-go/config"
 	"github.com/catalystsquad/app-utils-go/logging"
 	"github.com/nozzle/e"
 	"github.com/sirupsen/logrus"
@@ -27,7 +26,21 @@ For example, the two options available for this command are '--name' and '--the_
 'NAME' and 'THE_NAME' environment variables, those environment variables will be used. Flags given on the command line
 take precedence over environment variables.
 `,
-	Run: runExampleCommand,
+	// Run is the actual function that executes when the command is called. This is where your business logic should be. Or at least the entry point to it.
+	Run: func(cmd *cobra.Command, args []string) {
+		// instantiate config struct
+		config := &ExampleCommandConfig{}
+		// get config from viper, including struct validation. This lets us lean on viper for env var, or config file configuration with ease
+		err := configutils.GetConfigFromViper(config)
+		if err != nil {
+			// validation error, log an error and exit
+			logging.Log.WithError(err).Error("configuration is invalid")
+			os.Exit(1)
+		}
+		// got a valid config, do the things, for the example command that's just printing out the config we got
+		logging.Log.WithFields(logrus.Fields{"name": config.Name, "the_name": config.TheName}).Info("example command called")
+		// ... your implementation below, probably just a function call into more business logic so this function doesn't get super long
+	},
 }
 
 // init initializes the command and binds the flags to viper
@@ -44,34 +57,4 @@ func init() {
 	if err != nil {
 		panic(e.Wrap(err, e.Msg("error initializing configuration")))
 	}
-}
-
-// runExampleCommand is the function that has the command's business logic
-func runExampleCommand(cmd *cobra.Command, args []string) {
-	// instantiate config
-	config := &ExampleCommandConfig{}
-	// get config from viper, including struct validation. This lets us lean on viper for env var, or config file configuration with ease
-	err := GetConfigFromViper(config)
-	if err != nil {
-		// validation error, log an error and exit
-		logging.Log.WithError(err).Error("configuration is invalid")
-		os.Exit(1)
-	}
-	// got a valid config, do the things, for the example command that's just printing out the config we got
-	logging.Log.WithFields(logrus.Fields{"name": config.Name, "the_name": config.TheName}).Info("example command called")
-}
-
-func GetConfigFromViper(config interface{}) error {
-	settings := viper.AllSettings()
-	settingsJson, err := json.Marshal(settings)
-	if err != nil {
-		return err
-	}
-	logging.Log.WithField("settings", string(settingsJson)).Debug("viper settings")
-	err = json.Unmarshal(settingsJson, &config)
-	if err != nil {
-		return err
-	}
-	_, err = govalidator.ValidateStruct(config)
-	return err
 }
