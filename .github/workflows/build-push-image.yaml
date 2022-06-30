@@ -8,8 +8,8 @@ jobs:
     steps:
       - uses: catalystsquad/action-build-push-image-ecr@v1
         with:
-          aws-access-key-id: ${{ secrets.PULUMI_AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.PULUMI_AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ secrets.CICD_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.CICD_AWS_SECRET_ACCESS_KEY }}
           role-to-assume: arn:aws:iam::414790100315:role/OrganizationAccountAccessRole
           aws-region: us-west-2
           extra-account-access: 941986904600,378091611520 # nonprod, prod
