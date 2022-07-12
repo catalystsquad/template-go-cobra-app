@@ -6,11 +6,10 @@ package cmd
 
 import (
 	"fmt"
-	"os"
+	"strings"
 
 	"net/http"
 
-	configutils "github.com/catalystsquad/app-utils-go/config"
 	"github.com/catalystsquad/app-utils-go/logging"
 	"github.com/nozzle/e"
 	"github.com/sirupsen/logrus"
@@ -33,18 +32,25 @@ var runCmd = &cobra.Command{
 }
 
 type runCmdConfig struct {
-	ExampleServerPort int    `json:"example_server_port"`
-	EnableHealthCheck bool   `json:"enable_health_check"`
-	HealthCheckPath   string `json:"health_check_path"`
-	HealthCheckPort   int    `json:"health_check_port"`
+	ExampleServerPort int
+	EnableHealthCheck bool
+	HealthCheckPath   string
+	HealthCheckPort   int
 }
 
 func init() {
 	rootCmd.AddCommand(runCmd)
-	runCmd.PersistentFlags().Int("example_server_port", 8080, "port for example http server")
-	runCmd.PersistentFlags().Bool("enable_health_check", true, "when true, runs an http server on port 6000 that can be used for a health check for things like kubernetes with GET /health")
-	runCmd.PersistentFlags().String("health_check_path", "/health", "path to serve health check on when health check is enabled")
-	runCmd.PersistentFlags().Int("health_check_port", 6000, "port to serve health check on when health check is enabled")
+	runCmd.PersistentFlags().Int("example-server-port", 8080, "port for example http server")
+	runCmd.PersistentFlags().Bool("enable-health-check", true, "when true, runs an http server on port 6000 that can be used for a health check for things like kubernetes with GET /health")
+	runCmd.PersistentFlags().String("health-check-path", "/health", "path to serve health check on when health check is enabled")
+	runCmd.PersistentFlags().Int("health-check-port", 6000, "port to serve health check on when health check is enabled")
+
+	// set environment variable prefix to prevent any overlapping
+	viper.SetEnvPrefix("APP")
+
+	// replace "-" with "_" for environment variables
+	replacer := strings.NewReplacer("-", "_")
+	viper.SetEnvKeyReplacer(replacer)
 
 	// bind flags
 	err := viper.BindPFlags(runCmd.PersistentFlags())
@@ -57,14 +63,14 @@ func init() {
 func initRunCmdConfig() *runCmdConfig {
 	// instantiate config struct
 	config := &runCmdConfig{}
-	// get config from viper, including struct validation. This lets us lean on
-	// viper for env var, or config file configuration with ease
-	err := configutils.GetConfigFromViper(config)
-	if err != nil {
-		// validation error, log an error and exit
-		logging.Log.WithError(err).Error("configuration is invalid")
-		os.Exit(1)
-	}
+
+	config.ExampleServerPort = viper.GetInt("example-server-port")
+	config.EnableHealthCheck = viper.GetBool("enable-health-check")
+	config.HealthCheckPath = viper.GetString("health-check-path")
+	config.HealthCheckPort = viper.GetInt("health-check-port")
+
+	logging.Log.WithField("settings", fmt.Sprintf("%+v", *config)).Debug("viper settings")
+
 	return config
 }
 
