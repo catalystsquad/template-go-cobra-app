@@ -23,4 +23,4 @@ COPY --from=builder /workspace/main .
 COPY --from=builder /bin/grpc_health_probe ./grpc_health_probe
 USER 65532:65532
 
-ENTRYPOINT ["/main"]
+ENTRYPOINT ["/main", "run"]
