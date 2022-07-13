@@ -32,7 +32,7 @@ var runCmd = &cobra.Command{
 }
 
 type runCmdConfig struct {
-	ExampleServerPort int
+	Port              int
 	EnableHealthCheck bool
 	HealthCheckPath   string
 	HealthCheckPort   int
@@ -40,7 +40,7 @@ type runCmdConfig struct {
 
 func init() {
 	rootCmd.AddCommand(runCmd)
-	runCmd.PersistentFlags().Int("example-server-port", 8080, "port for example http server")
+	runCmd.PersistentFlags().Int("port", 8080, "port for example http server")
 	runCmd.PersistentFlags().Bool("enable-health-check", true, "when true, runs an http server on port 6000 that can be used for a health check for things like kubernetes with GET /health")
 	runCmd.PersistentFlags().String("health-check-path", "/health", "path to serve health check on when health check is enabled")
 	runCmd.PersistentFlags().Int("health-check-port", 6000, "port to serve health check on when health check is enabled")
@@ -64,7 +64,7 @@ func initRunCmdConfig() *runCmdConfig {
 	// instantiate config struct
 	config := &runCmdConfig{}
 
-	config.ExampleServerPort = viper.GetInt("example-server-port")
+	config.Port = viper.GetInt("port")
 	config.EnableHealthCheck = viper.GetBool("enable-health-check")
 	config.HealthCheckPath = viper.GetString("health-check-path")
 	config.HealthCheckPort = viper.GetInt("health-check-port")
@@ -94,7 +94,7 @@ func runExampleServer(config *runCmdConfig) {
 		fmt.Fprintf(w, "Hello!")
 	})
 
-	address := fmt.Sprintf(":%d", config.ExampleServerPort)
+	address := fmt.Sprintf(":%d", config.Port)
 	logging.Log.WithFields(logrus.Fields{"address": address, "path": "/"}).Info("starting example server")
 	err := http.ListenAndServe(address, nil)
 	if err != nil {
