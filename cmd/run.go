@@ -6,7 +6,6 @@ package cmd
 
 import (
 	"fmt"
-	"strings"
 
 	"net/http"
 
@@ -41,16 +40,9 @@ type runCmdConfig struct {
 func init() {
 	rootCmd.AddCommand(runCmd)
 	runCmd.PersistentFlags().Int("port", 8080, "port for example http server")
-	runCmd.PersistentFlags().Bool("enable-health-check", true, "when true, runs an http server on port 6000 that can be used for a health check for things like kubernetes with GET /health")
-	runCmd.PersistentFlags().String("health-check-path", "/health", "path to serve health check on when health check is enabled")
-	runCmd.PersistentFlags().Int("health-check-port", 6000, "port to serve health check on when health check is enabled")
-
-	// set environment variable prefix to prevent any overlapping
-	viper.SetEnvPrefix("APP")
-
-	// replace "-" with "_" for environment variables
-	replacer := strings.NewReplacer("-", "_")
-	viper.SetEnvKeyReplacer(replacer)
+	runCmd.PersistentFlags().Bool("enable_health_check", true, "when true, runs an http server on port 6000 that can be used for a health check for things like kubernetes with GET /health")
+	runCmd.PersistentFlags().String("health_check_path", "/health", "path to serve health check on when health check is enabled")
+	runCmd.PersistentFlags().Int("health_check_port", 6000, "port to serve health check on when health check is enabled")
 
 	// bind flags
 	err := viper.BindPFlags(runCmd.PersistentFlags())
@@ -65,9 +57,9 @@ func initRunCmdConfig() *runCmdConfig {
 	config := &runCmdConfig{}
 
 	config.Port = viper.GetInt("port")
-	config.EnableHealthCheck = viper.GetBool("enable-health-check")
-	config.HealthCheckPath = viper.GetString("health-check-path")
-	config.HealthCheckPort = viper.GetInt("health-check-port")
+	config.EnableHealthCheck = viper.GetBool("enable_health_check")
+	config.HealthCheckPath = viper.GetString("health_check_path")
+	config.HealthCheckPort = viper.GetInt("health_check_port")
 
 	logging.Log.WithField("settings", fmt.Sprintf("%+v", *config)).Debug("viper settings")
 
