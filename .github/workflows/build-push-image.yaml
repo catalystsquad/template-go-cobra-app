@@ -10,7 +10,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.CICD_AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.CICD_AWS_SECRET_ACCESS_KEY }}
-          role-to-assume: arn:aws:iam::414790100315:role/OrganizationAccountAccessRole
+          role-to-assume: ${{ secrets.COMMON_CICD_ROLE_ARN }}
           aws-region: us-west-2
           extra-account-access: 941986904600,378091611520 # nonprod, prod
           build-secrets: |
